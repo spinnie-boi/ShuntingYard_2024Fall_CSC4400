@@ -8,6 +8,8 @@ public class Main {
 		System.out.println(list);
 		TokenList queue = ShuntngYard.BuildFromTokens(list);
 		System.out.println(queue);
+		int result = ShuntngYard.Process(queue);
+		System.out.println(result);
 	}
 
 }
