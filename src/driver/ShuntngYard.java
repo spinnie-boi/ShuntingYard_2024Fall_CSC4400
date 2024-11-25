@@ -47,21 +47,53 @@ public class ShuntngYard {
 	//take the tokens from Tokens queue, and stored the reversed polish expression in ReversePolish queue
 	public static TokenList BuildFromTokens(TokenList tokenList) {
 		TokenList outputQueue = new TokenList();
-		/*
-	     * 1.  While there are tokens to be read:
-	     * 2.        Read a token
-	     * 3.        If it's a number add it to queue
-	     * 4.        If it's an operator
-	     * 5.               While there's an operator on the top of the stack with greater precedence:
-	     * 6.                       Pop operators from the stack onto the output queue
-	     * 7.               Push the current operator onto the stack
-	     * 8.        If it's a left bracket push it onto the stack
-	     * 9.        If it's a right bracket 
-	     * 10.            While there's not a left bracket at the top of the stack:
-	     * 11.                     Pop operators from the stack onto the output queue.
-	     * 12.             Pop the left bracket from the stack and discard it
-	     * 13. While there are operators on the stack, pop them to the queue
-	     */
+		TokenList operatorStack = new TokenList();
+	
+		// * 1. While there are tokens to be read:
+		Node<String> currentNode = tokenList.Head; // Start at the head of the list
+    
+		while (currentNode != null) {
+			String token = currentNode.Payload;  // Access the token in the current node
+	
+			// * 2. If the token is a number, add it to the output queue
+			if (IsNumber(token)) {
+				outputQueue.Enqueue(new Node<String>(token));
+			} 
+			// * 3. If the token is an operator
+			else if (Operators.indexOf(token.charAt(0)) != -1) {
+				while (!operatorStack.IsEmpty() && 
+					   getPrecedence(token) <= getPrecedence(operatorStack.Peek().Payload) &&
+					   operatorStack.Peek().Payload.charAt(0) != '(') {
+					// Pop operators from the stack to the output queue while the operator at the top
+					// of the stack has greater precedence than the current token
+					outputQueue.Enqueue(operatorStack.Pop());
+				}
+				// Push the current operator onto the stack
+				operatorStack.Push(new Node<String>(token));
+			} 
+			// * 4. If the token is a left parenthesis, push it onto the stack
+			else if (token.equals("(")) {
+				operatorStack.Push(new Node<String>(token));
+			} 
+			// * 5. If the token is a right parenthesis
+			else if (token.equals(")")) {
+				// Pop operators from the stack to the output queue until a left parenthesis is encountered
+				while (!operatorStack.IsEmpty() && !operatorStack.Peek().Payload.equals("(")) {
+					outputQueue.Enqueue(operatorStack.Pop());
+				}
+				// Discard the left parenthesis
+				operatorStack.Pop();
+			}
+	
+			// Move to the next node in the list
+			currentNode = currentNode.NextNode;
+		}
+	
+		// * 6. Pop any remaining operators from the stack to the output queue
+		while (!operatorStack.IsEmpty()) {
+			outputQueue.Enqueue(operatorStack.Pop());
+		}
+	
 		return outputQueue;
 	}
 	
